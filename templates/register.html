@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block title %}
+    bookdb - Register
+{% endblock %}
+
+{% block body %}
+    <div class="mainContent">
+        <h1>Create Your Account</h1>
+
+        <form action="{{ url_for('registered') }}" method="POST">
+            <text>Username:</text>
+            <input type='text' name='username' placeholder="username">
+            <br>
+            <text>Password:</text>
+            <input type='password' name='password' placeholder="password">
+            <button>Create Account</button>
+        </form>
+    </div>
+{% endblock %}

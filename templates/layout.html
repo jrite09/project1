@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{% block title %}{% endblock %}</title> 
+     </head>
+     <body>
+        {% block body %}
+        {% endblock %}
+     </body>
+     <br>
+     <footer>
+         <div id="bottomNav">
+             <a href="{{ url_for('index') }}">Home</a>
+         </div>
+     </footer>
+</html>
+

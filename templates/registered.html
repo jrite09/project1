@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    bookdb - Registered
+{% endblock %}
+
+{% block body %}
+    <div class=mainContent>
+        <h1>Success!</h1>
+        <p>Your account has been created.</p>
+        <a href="{{ url_for('login') }}">Please click here to login.</a>
+    </div>
+{% endblock %}
