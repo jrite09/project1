@@ -22,9 +22,6 @@ Session(app)
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
-# create an empty array inside session to hold user id's of those logged in
-
-
 @app.route("/")
 def index():
     return render_template("index.html")
