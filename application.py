@@ -28,6 +28,7 @@ def index():
 
 @app.route("/register")
 def register():
+    # if the user is already logged in, redirect them to the search page
     if session.get('active_user') != None:
         return redirect(url_for('search'))
     return render_template("register.html")
@@ -47,12 +48,14 @@ def registered():
 
 @app.route("/login")
 def login():
+    # if the user is already logged in, redirect them to the search page
     if session.get('active_user') != None:
         return redirect(url_for('search'))
     return render_template("login.html")
 
 @app.route("/logout")
 def logout():
+    # if the user isn't logged in to an account, show them the appropriate error page
     if session.get('active_user') == None:
         return render_template("error.html", message="You are not logged in to an account")
     session.pop('active_user', None)
@@ -80,6 +83,7 @@ def verify():
 
 @app.route("/search")
 def search():
+    # if the user is not logged in, redirect them to the login page
     if session.get('active_user') == None:
         return redirect(url_for("login"))
     return render_template("search.html")
