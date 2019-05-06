@@ -5,8 +5,15 @@
 {% endblock %}
 
 {% block body %}
-    <div>
+    <div class="mainContent">
         <h1>Search Page - WIP</h1>
-        <a href="{{ url_for('logout')  }}">Logout</a>
+        <p>Please enter a Title, Author, or ISBN:</p>
+        <form action="{{ url_for('searching') }}" method='POST'>
+            <input type="text" name="query">
+            <button>Search</button>
+        </form>
+    </div>
+    <div class="secondaryContent">
+    <a href="{{ url_for('logout')  }}">Logout</a>
     </div>
 {% endblock %}

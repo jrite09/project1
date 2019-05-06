@@ -87,3 +87,25 @@ def search():
     if session.get('active_user') == None:
         return redirect(url_for("login"))
     return render_template("search.html")
+
+@app.route("/searching", methods=['POST'])
+def searching():
+    # import the user query value from the form
+    query = request.form.get("query")
+
+    # wrap the query in '%' for easier SQL searching
+    searchQuery = '%' + query + '%'
+
+    # check how many results the query returns
+    resultsCount = db.execute("SELECT * FROM books WHERE isbn LIKE :query OR author LIKE :query OR title LIKE :query", { "query": searchQuery }).rowcount
+
+    # display variations of results page depending on how many results there are
+    if resultsCount == 1:
+
+    elif resultsCount > 1:
+    
+    else:
+    
+@app.route("/api/<int:isbn>")
+def isbn():
+    
