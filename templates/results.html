@@ -1,14 +1,16 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    bookdb - Results
+    bookdb - Search
 {% endblock %}
 
 {% block body %}
-    <h1>Results</h1>
-    <ul>
-        {% for books in results %}
-        <li>{{ books['isbn'] }}, {{ resultsCount }}</li>
-        {% endfor %}
-    </ul>
+    <div>
+        <h1>Your search returned {{ resultsCount }} results.</h1>
+        <ul>
+            {% for books in results %}
+            <li><a href="{{ url_for('result', isbn=books.isbn) }}">{{ books.isbn }}: {{ books.title }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}

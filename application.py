@@ -1,6 +1,6 @@
 import os
 import sys
-from flask import Flask, session, render_template, request, redirect, url_for, flash
+from flask import Flask, session, render_template, request, redirect, url_for, flash, jsonify
 from flask_session import Session
 from sqlalchemy import create_engine, exc
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -59,7 +59,6 @@ def logout():
     if session.get('active_user') == None:
         return render_template("error.html", message="You are not logged in to an account")
     session.pop('active_user', None)
-    flash('You were logged out.')
     return redirect(url_for("index"))
 
 @app.route("/verify", methods=["GET", "POST"])
@@ -97,17 +96,46 @@ def searching():
     searchQuery = '%' + query + '%'
 
     # check how many results the query returns
-    results = db.execute("SELECT id FROM books WHERE isbn LIKE :query OR author LIKE :query OR title LIKE :query", { "query": searchQuery })
-    resultsCount = db.execute("SELECT * FROM books WHERE isbn LIKE :query OR author LIKE :query OR title LIKE :query", { "query": searchQuery }).rowcount
-
+    results = db.execute("SELECT * FROM books WHERE isbn ILIKE :query OR author ILIKE :query OR title ILIKE :query", { "query": searchQuery }).fetchall()
+    resultsCount = db.execute("SELECT * FROM books WHERE isbn ILIKE :query OR author ILIKE :query OR title ILIKE :query", { "query": searchQuery }).rowcount
+    print(results)
     # display variations of results page depending on how many results there are
     if resultsCount == 1:
-        return render_template("error.html", message="Not yet implemented")
+        return redirect(url_for('result', isbn=results[0][1]))
     elif resultsCount > 1:
         return render_template("results.html", results=results, resultsCount=resultsCount)
     else:
         return render_template("error.html", message="Sorry, there are no matching books in the database")
     
-@app.route("/api/<int:isbn>")
-def isbn():
-    return render_template("error.html", message="Not yet implemented")
+@app.route("/result/<isbn>", methods=['GET', 'POST'])
+def result(isbn):
+    # displays the book page dynamically based on isbn
+    book = db.execute("SELECT * FROM books WHERE isbn ILIKE :isbn", { "isbn": isbn }).fetchone()
+    review = db.execute("SELECT * FROM reviews WHERE isbn ILIKE :isbn", { "isbn": isbn}).fetchall()
+    scoreHold = db.execute("SELECT AVG(score) FROM reviews where isbn ILIKE :isbn", { "isbn": isbn}).fetchall()
+    reviewCount = db.execute("SELECT * FROM reviews WHERE isbn ILIKE :isbn", { "isbn": isbn}).rowcount
+    if scoreHold[0][0] == None:
+        avgScore = 0
+    else:
+        avgScore = round(scoreHold[0][0], 2)
+    return render_template("bookTemplate.html", book=book, reviews=review, avgScore=avgScore, isbn=isbn, reviewCount=reviewCount)
+
+@app.route("/review", methods=["POST"])
+def review():
+    score = request.form.get("score")
+    comment = request.form.get("comment")
+    isbn = request.form.get("isbn")
+    userReview = session.get("active_user")
+    print(userReview)
+    # get a list of the users who have submitted a review for this book
+    currentReviews = db.execute("SELECT username FROM reviews WHERE isbn ILIKE :isbn", { "isbn": isbn }).fetchone()
+    print(currentReviews)
+
+    # check if the user has already submitted a review for this book
+    if userReview in currentReviews[0]:
+        return render_template("error.html", message="You have already submitted a review for this book.")
+    
+    # if the user has not already submitted a review for the book, insert it into the table
+    db.execute("INSERT INTO reviews (isbn, username, score, comment) VALUES (:isbn, :username, :score, :comment)", { "isbn": isbn, "username": userReview, "score": score, "comment": comment })
+    db.commit()
+    return redirect(url_for("result", isbn=isbn))

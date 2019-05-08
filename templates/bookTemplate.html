@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    bookdb - {{ book.title }}
+{% endblock %}
+
+{% block body %}
+    <div class="mainContent">
+        <font><b>Title:</b> {{ book.title }}</font><br>
+        <font><b>Author:</b> {{ book.author }}</font><br>
+        <font><b>Year:</b> {{ book.year }}</font><br>
+        <font><b>ISBN:</b> {{ book.isbn }}</font><br>
+        <font><b>Number of Reviews:</b> {{ reviewCount }}</font><br>
+        <font><b>Average Review Score:</b> {{ avgScore }}</font>
+
+        <h3>Enter a review:</h3>
+        <b>Score:</b>
+        <form action="{{ url_for('review', isbn=book.isbn) }}" method="POST">
+            <select name="score">
+                <option value='1'>1</option>
+                <option value='2'>2</option>
+                <option value='3'>3</option>
+                <option value='4'>4</option>
+                <option value='5'>5</option>
+            </select>
+            <br>
+            <br>
+            <b>Comment:</b>
+            <br>
+            <textarea name="comment" placeholder="Enter your comments here"></textarea>
+            <br>
+            <button name="isbn" value="{{ book.isbn }}">Submit</button>
+        </form>
+
+        <h3>Reviews from bookdb Users:</h3>
+        <ul>
+            {% for review in reviews %}
+            <li>
+                <b>User:</b> <font size="4">{{ review.username }}</font> <br>
+                <b>Score:</b> {{ review.score }} <br>
+                <b>Comment:</b> {{ review.comment }}
+            </li><br>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
