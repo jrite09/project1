@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    bookdb - {{ books.title }}
+{% endblock %}
+
+{% block body %}
+    <h1>{{ books.title }}</h1>
+    <p><b>ISBN:</b> {{ books.isbn }}</p>
+    <p><b>Author:</b> {{ books.author }}</p>
+    <p><b>Average Score:</b> TODO</p>
+{% endblock %}

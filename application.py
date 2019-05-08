@@ -97,15 +97,17 @@ def searching():
     searchQuery = '%' + query + '%'
 
     # check how many results the query returns
+    results = db.execute("SELECT id FROM books WHERE isbn LIKE :query OR author LIKE :query OR title LIKE :query", { "query": searchQuery })
     resultsCount = db.execute("SELECT * FROM books WHERE isbn LIKE :query OR author LIKE :query OR title LIKE :query", { "query": searchQuery }).rowcount
 
     # display variations of results page depending on how many results there are
     if resultsCount == 1:
-
+        return render_template("error.html", message="Not yet implemented")
     elif resultsCount > 1:
-    
+        return render_template("results.html", results=results, resultsCount=resultsCount)
     else:
+        return render_template("error.html", message="Sorry, there are no matching books in the database")
     
 @app.route("/api/<int:isbn>")
 def isbn():
-    
+    return render_template("error.html", message="Not yet implemented")
