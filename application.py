@@ -1,5 +1,6 @@
 import os
 import sys
+import requests
 from flask import Flask, session, render_template, request, redirect, url_for, flash, jsonify
 from flask_session import Session
 from sqlalchemy import create_engine, exc
@@ -98,7 +99,7 @@ def searching():
     # check how many results the query returns
     results = db.execute("SELECT * FROM books WHERE isbn ILIKE :query OR author ILIKE :query OR title ILIKE :query", { "query": searchQuery }).fetchall()
     resultsCount = db.execute("SELECT * FROM books WHERE isbn ILIKE :query OR author ILIKE :query OR title ILIKE :query", { "query": searchQuery }).rowcount
-    print(results)
+    # print(results)
     # display variations of results page depending on how many results there are
     if resultsCount == 1:
         return redirect(url_for('result', isbn=results[0][1]))
@@ -110,14 +111,14 @@ def searching():
 @app.route("/result/<isbn>", methods=['GET', 'POST'])
 def result(isbn):
     # displays the book page dynamically based on isbn
+    # stores several different SQL commands in variables for easier access inside the html template
+    # grabs data for the current book from the goodreads api
+    goodReadsData = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "zwer66e5X5xJI1C3doLQ", "isbns": isbn}).json()
     book = db.execute("SELECT * FROM books WHERE isbn ILIKE :isbn", { "isbn": isbn }).fetchone()
     review = db.execute("SELECT * FROM reviews WHERE isbn ILIKE :isbn", { "isbn": isbn}).fetchall()
-    scoreHold = db.execute("SELECT AVG(score) FROM reviews where isbn ILIKE :isbn", { "isbn": isbn}).fetchall()
-    reviewCount = db.execute("SELECT * FROM reviews WHERE isbn ILIKE :isbn", { "isbn": isbn}).rowcount
-    if scoreHold[0][0] == None:
-        avgScore = 0
-    else:
-        avgScore = round(scoreHold[0][0], 2)
+    reviewCount = db.execute("SELECT * FROM reviews WHERE isbn ILIKE :isbn", { "isbn": isbn}).rowcount + int(goodReadsData["books"][0]["work_ratings_count"])
+    avgScore = round(float(goodReadsData["books"][0]["average_rating"]), 2)
+
     return render_template("bookTemplate.html", book=book, reviews=review, avgScore=avgScore, isbn=isbn, reviewCount=reviewCount)
 
 @app.route("/review", methods=["POST"])
@@ -132,7 +133,7 @@ def review():
     print(currentReviews)
 
     # check if the user has already submitted a review for this book
-    if userReview in currentReviews[0]:
+    if currentReviews != None and userReview in currentReviews[0]:
         return render_template("error.html", message="You have already submitted a review for this book.")
     
     # if the user has not already submitted a review for the book, insert it into the table

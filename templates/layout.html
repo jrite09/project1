@@ -10,10 +10,11 @@
      <br>
      <footer>
          <div id="bottomNav">
-             <a href="{{ url_for('index') }}">Home</a><br>
              {% if session['active_user'] %}
+             <a href="{{ url_for('search') }}">Home</a><br>
              <a href="{{ url_for('logout') }}">Logout</a>
              {% else %}
+             <a href="{{ url_for('index') }}">Home</a><br>
              <a href="{{ url_for('login') }}">Login</a>
              {% endif %}
          </div>
