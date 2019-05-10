@@ -1,6 +1,7 @@
 import os
 import sys
 import requests
+import json
 from flask import Flask, session, render_template, request, redirect, url_for, flash, jsonify
 from flask_session import Session
 from sqlalchemy import create_engine, exc
@@ -140,3 +141,19 @@ def review():
     db.execute("INSERT INTO reviews (isbn, username, score, comment) VALUES (:isbn, :username, :score, :comment)", { "isbn": isbn, "username": userReview, "score": score, "comment": comment })
     db.commit()
     return redirect(url_for("result", isbn=isbn))
+
+@app.route("/api/<isbn>", methods=["GET"])
+def api(isbn):
+    book = db.execute("SELECT * FROM books WHERE isbn ILIKE :isbn", { "isbn": isbn }).fetchone()
+    goodReadsData = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "zwer66e5X5xJI1C3doLQ", "isbns": isbn}).json()
+
+    bookData = {
+        "title": book.title,
+        "author": book.author,
+        "year": book.year,
+        "isbn": book.isbn,
+        "review_count": int(goodReadsData["books"][0]["work_ratings_count"]),
+        "average_score": round(float(goodReadsData["books"][0]["average_rating"]), 2)
+    }
+    json_bookData = json.dumps(bookData)
+    return json_bookData
